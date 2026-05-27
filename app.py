@@ -80,7 +80,7 @@ if not all_ships_data.empty:
     val3 = all_ships_data['Average_size_GT_of_vessels_Value'].values[0]
     
     txt1 = f"{val1} 天" if pd.notna(val1) else "無資料"
-    txt2 = f"{val2} 年" if pd.notna(val2) else "無資料"
+    txt2 = f"{val2} 年 (最老約27年)" if pd.notna(val2) else "無資料"
     txt3 = f"{val3:,.0f} 噸" if pd.notna(val3) else "無資料"
     
     col1, col2, col3 = st.columns(3)
@@ -98,17 +98,34 @@ st.markdown("---")
 # 5. 港口壅塞度與時間對比 (長條圖優化)
 st.markdown("### 📈 各船型在港停留時間對比 (橫向壅塞效率分析)")
 if not vessel_comparison_df.empty:
-    chart1_df = vessel_comparison_df.dropna(subset=['Median_time_in_port_days_Value'])
+    chart1_df = vessel_comparison_df.dropna(subset=['Median_time_in_port_days_Value']).copy()
     if not chart1_df.empty:
+        # 🔥【最新核心優化】建立船型中英文對照表
+        vessel_type_cn = {
+            "Liquid bulk carriers": "液體散裝船 (油輪)",
+            "Liquefied petroleum gas carriers": "液化石油氣船 (LPG)",
+            "Liquefied natural gas carriers": "液化天然氣船 (LNG)",
+            "Dry bulk carriers": "乾散裝船 (穀物/礦石)",
+            "Dry breakbulk carriers": "雜貨船 (散裝箱)",
+            "Container ships": "貨櫃船 (標準箱)"
+        }
+        # 將英文欄位轉換為中文新欄位
+        chart1_df['Vessel_Type_CN'] = chart1_df['CommercialMarket_Label'].map(vessel_type_cn).fillna(chart1_df['CommercialMarket_Label'])
+        
         fig_time = px.bar(
             chart1_df,
-            x='CommercialMarket_Label',
+            x='Vessel_Type_CN',  # 這裡改成中文欄位，X 軸就會直接變中文！
             y='Median_time_in_port_days_Value',
-            labels={'CommercialMarket_Label': '船舶類型 (Vessel Type)', 'Median_time_in_port_days_Value': '在港停留天數中位數 (Days)'},
+            labels={
+                'Vessel_Type_CN': '船舶類型 (Vessel Type)', 
+                'Median_time_in_port_days_Value': '在港停留天數中位數 (Days)'
+            },
             color='Median_time_in_port_days_Value',
             color_continuous_scale='Reds',
             title="🏆 各類型船隻卡在港口的天數"
         )
+        # 優化右側色條 (Colorbar) 顯示標題
+        fig_time.update_coloraxes(colorbar_title_text="在港天數")
         fig_time.update_layout(font=dict(size=16), title_font=dict(size=20))
         st.plotly_chart(fig_time, use_container_width=True)
     else:
@@ -122,19 +139,30 @@ st.markdown("---")
 st.markdown("### 🚢 船舶載運規模與載重噸位 (DWT) 關聯分析")
 st.markdown("*(數據科學解讀：此圖呈現不同船型的平均總噸位 GT 與載重能力 DWT 的線性關係，圓點越大代表船隻物理體積越大。)*")
 
-scatter_df = vessel_comparison_df.dropna(subset=['Average_size_GT_of_vessels_Value', 'Average_cargo_carrying_capacity_dwt_per_vessel_Value'])
+scatter_df = vessel_comparison_df.dropna(subset=['Average_size_GT_of_vessels_Value', 'Average_cargo_carrying_capacity_dwt_per_vessel_Value']).copy()
 
 if not scatter_df.empty:
+    # 同步把散佈圖（氣泡圖）的分類標籤也換成中文
+    vessel_type_cn = {
+        "Liquid bulk carriers": "液體散裝船 (油輪)",
+        "Liquefied petroleum gas carriers": "液化石油氣船 (LPG)",
+        "Liquefied natural gas carriers": "液化天然氣船 (LNG)",
+        "Dry bulk carriers": "乾散裝船 (穀物/礦石)",
+        "Dry breakbulk carriers": "雜貨船 (散裝箱)",
+        "Container ships": "貨櫃船 (標準箱)"
+    }
+    scatter_df['Vessel_Type_CN'] = scatter_df['CommercialMarket_Label'].map(vessel_type_cn).fillna(scatter_df['CommercialMarket_Label'])
+
     fig_scatter = px.scatter(
         scatter_df,
         x='Average_size_GT_of_vessels_Value',
         y='Average_cargo_carrying_capacity_dwt_per_vessel_Value',
         size='Average_size_GT_of_vessels_Value',
-        color='CommercialMarket_Label',
+        color='Vessel_Type_CN',  # 圖例也改成中文！
         labels={
             'Average_size_GT_of_vessels_Value': '平均船舶總噸位 (Average Size GT)',
             'Average_cargo_carrying_capacity_dwt_per_vessel_Value': '平均載重噸位 (Average DWT - 船隻能載多重的貨)',
-            'CommercialMarket_Label': '船舶類型'
+            'Vessel_Type_CN': '船舶類型'
         },
         title="🔮 停靠船型之規模 (GT) 與實際載重能力 (DWT) 交叉關聯圖"
     )
@@ -153,7 +181,7 @@ tab1, tab2 = st.tabs(["🔍 資料敘述性統計 (Kaggle EDA 經典特徵)", "�
 with tab1:
     st.markdown("#### 📝 目前篩選數據的數值特徵摘要 (Summary Statistics)")
     if not filtered_df.empty:
-        # 顯示原本乾淨漂亮的統計摘要表格 (橫向欄位顯示中文)
+        # 顯示統計摘要表格
         st.dataframe(
             filtered_df.describe().T, 
             use_container_width=True, 
@@ -170,7 +198,6 @@ with tab1:
             }
         )
         
-        # 完美的中文解釋區
         st.markdown("---")
         st.markdown("### 📖 表格左側【海運英文專有名詞】中文白話文對照解釋")
         
