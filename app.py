@@ -65,7 +65,6 @@ st.markdown("### 📈 各船型在港停留時間對比 (橫向壅塞效率分�
 if not vessel_comparison_df.empty:
     chart1_df = vessel_comparison_df.dropna(subset=['Median_time_in_port_days_Value']).copy()
     if not chart1_df.empty:
-        # 中英文並列對照表，加入換行標籤 <br> 讓字平躺
         vessel_type_combined = {
             "Liquid bulk carriers": "Liquid bulk carriers<br>(液體散裝船/油輪)",
             "Liquefied petroleum gas carriers": "Liquefied petroleum gas carriers<br>(液化石油氣船)",
@@ -82,7 +81,7 @@ if not vessel_comparison_df.empty:
             color='Median_time_in_port_days_Value', color_continuous_scale='Reds', title="🏆 各類型船隻卡在港口的天數"
         )
         fig_time.update_coloraxes(colorbar_title_text="在港天數")
-        fig_time.update_xaxes(tickangle=0) # 強制文字保持水平不傾斜
+        fig_time.update_xaxes(tickangle=0) 
         fig_time.update_layout(font=dict(size=14), title_font=dict(size=20))
         st.plotly_chart(fig_time, use_container_width=True)
 else:
@@ -90,17 +89,32 @@ else:
 
 st.markdown("---")
 
-# 6. 數據統計摘要與明細 (防斷尾精簡版)
+# 6. 數據統計摘要與明細 (藍色框框完美復活版)
 st.markdown("### 📋 數據科學統計摘要與原始明細")
-tab1, tab2 = st.tabs(["🔍 資料敘述性統計", "📋 原始篩選數據明細"])
+tab1, tab2 = st.tabs(["🔍 資料敘述性統計 (Kaggle EDA 經典特徵)", "📋 原始篩選數據明細 (Excel 樣式表格)"])
 
 with tab1:
     if not filtered_df.empty:
+        # 1. 顯示表格 (橫向欄位中文、左邊留英文)
         st.dataframe(filtered_df.describe().T, use_container_width=True, height=280, column_config={
             "count": "📊 樣本筆數 (Count)", "mean": "📈 平均值 (Mean)", "std": "📉 標準差 (Std)",
             "min": "⬇️ 最小值 (Min)", "25%": "¼ 25%分位數", "50%": "🌓 中位數 (50%)",
             "75%": "¾ 75%分位數", "max": "⬆️ 最大值 (Max)"
         })
+        
+        # 2. 🔥【藍色方框貼心小卡完整復活！】
+        st.markdown("---")
+        st.markdown("### 📖 表格左側【海運英文專有名詞】中文白話文對照解釋")
+        st.info("""
+        * **`Average_age_of_vessels_years_Value`** ➡️ **【停靠船舶平均船齡】**：停靠船隻的平均年齡（歲）。
+        * **`Median_time_in_port_days_Value`** ➡️ **【船舶在港停留時間中位數】**：進港到排隊離開總天數，為衡量塞港核心指標。
+        * **`Average_size_GT_of_vessels_Value`** ➡️ **【平均船舶總噸位】**：Gross Tonnage 船隻內部總體積空間，代表船隻規模。
+        * **`Average_cargo_carrying_capacity_dwt_per_vessel_Value`** ➡️ **【平均船舶載重噸位】**：Deadweight Tonnage 船隻實際能載運的貨物重量。
+        * **`Average_container_carrying_capacity_TEU_per_container_ship_Value`** ➡️ **【貨櫃船平均運載量 (TEU)】**：平均每艘貨櫃船能載多少個 20 呎標準箱。
+        * **`Maximum_size_GT_of_vessels_Value`** ➡️ **【停靠最大船舶總噸位】**：觀測期間內接待過體積最大的超級巨輪規模。
+        * **`Maximum_cargo_carrying_capacity_dwt_of_vessels_Value`** ➡️ **【停靠最大船舶載重噸位】**：觀測期間內接待過載貨最重的超級巨輪重量。
+        * **`Maximum_container_carrying_capacity_TEU_of_container_ships_Value`** ➡️ **【停靠最大貨櫃船運載量 (TEU)】**：接待過載貨箱數最多的巨無霸貨櫃船容量。
+        """)
 
 with tab2:
     if not filtered_df.empty:
