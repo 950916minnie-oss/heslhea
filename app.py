@@ -72,4 +72,7 @@ vessel_comparison_df = filtered_df[filtered_df['CommercialMarket_Label'] != 'All
 # 4. 關鍵績效指標 (KPI 分類總覽)
 st.markdown(f"### 📊 觀測焦點：{selected_economy} 在 {selected_period} 的核心數據總覽")
 
-all_ships_data = filtered_df[filtered_df['CommercialMarket_Label'] == 'All ships
+all_ships_data = filtered_df[filtered_df['CommercialMarket_Label'] == 'All ships']
+
+col1, col2, col3 = st.columns(3)
+if not all_ships
