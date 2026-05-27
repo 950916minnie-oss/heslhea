@@ -100,33 +100,32 @@ st.markdown("### 📈 各船型在港停留時間對比 (橫向壅塞效率分�
 if not vessel_comparison_df.empty:
     chart1_df = vessel_comparison_df.dropna(subset=['Median_time_in_port_days_Value']).copy()
     if not chart1_df.empty:
-        # 🔥【最新核心優化】建立船型中英文對照表
-        vessel_type_cn = {
-            "Liquid bulk carriers": "液體散裝船 (油輪)",
-            "Liquefied petroleum gas carriers": "液化石油氣船 (LPG)",
-            "Liquefied natural gas carriers": "液化天然氣船 (LNG)",
-            "Dry bulk carriers": "乾散裝船 (穀物/礦石)",
-            "Dry breakbulk carriers": "雜貨船 (散裝箱)",
-            "Container ships": "貨櫃船 (標準箱)"
+        # 🔥【中英文完美並列對照表】保留英文原名，後面補上中文解釋
+        vessel_type_combined = {
+            "Liquid bulk carriers": "Liquid bulk carriers (液體散裝船/油輪)",
+            "Liquefied petroleum gas carriers": "Liquefied petroleum gas carriers (液化石油氣船)",
+            "Liquefied natural gas carriers": "Liquefied natural gas carriers (液化天然氣船)",
+            "Dry bulk carriers": "Dry bulk carriers (乾散裝船/穀物礦石)",
+            "Dry breakbulk carriers": "Dry breakbulk carriers (雜貨船/散裝箱)",
+            "Container ships": "Container ships (貨櫃船/標準箱)"
         }
-        # 將英文欄位轉換為中文新欄位
-        chart1_df['Vessel_Type_CN'] = chart1_df['CommercialMarket_Label'].map(vessel_type_cn).fillna(chart1_df['CommercialMarket_Label'])
+        # 轉換為新欄位
+        chart1_df['Vessel_Type_Combined'] = chart1_df['CommercialMarket_Label'].map(vessel_type_combined).fillna(chart1_df['CommercialMarket_Label'])
         
         fig_time = px.bar(
             chart1_df,
-            x='Vessel_Type_CN',  # 這裡改成中文欄位，X 軸就會直接變中文！
+            x='Vessel_Type_Combined',  # 換成並列欄位
             y='Median_time_in_port_days_Value',
             labels={
-                'Vessel_Type_CN': '船舶類型 (Vessel Type)', 
+                'Vessel_Type_Combined': '船舶類型 (Vessel Type)', 
                 'Median_time_in_port_days_Value': '在港停留天數中位數 (Days)'
             },
             color='Median_time_in_port_days_Value',
             color_continuous_scale='Reds',
             title="🏆 各類型船隻卡在港口的天數"
         )
-        # 優化右側色條 (Colorbar) 顯示標題
         fig_time.update_coloraxes(colorbar_title_text="在港天數")
-        fig_time.update_layout(font=dict(size=16), title_font=dict(size=20))
+        fig_time.update_layout(font=dict(size=15), title_font=dict(size=20))
         st.plotly_chart(fig_time, use_container_width=True)
     else:
         st.info("💡 該地區在此期間內無個別船型詳細數據。")
@@ -142,31 +141,31 @@ st.markdown("*(數據科學解讀：此圖呈現不同船型的平均總噸位 G
 scatter_df = vessel_comparison_df.dropna(subset=['Average_size_GT_of_vessels_Value', 'Average_cargo_carrying_capacity_dwt_per_vessel_Value']).copy()
 
 if not scatter_df.empty:
-    # 同步把散佈圖（氣泡圖）的分類標籤也換成中文
-    vessel_type_cn = {
-        "Liquid bulk carriers": "液體散裝船 (油輪)",
-        "Liquefied petroleum gas carriers": "液化石油氣船 (LPG)",
-        "Liquefied natural gas carriers": "液化天然氣船 (LNG)",
-        "Dry bulk carriers": "乾散裝船 (穀物/礦石)",
-        "Dry breakbulk carriers": "雜貨船 (散裝箱)",
-        "Container ships": "貨櫃船 (標準箱)"
+    # 散佈圖右側圖例也同步改成中英文並列
+    vessel_type_combined = {
+        "Liquid bulk carriers": "Liquid bulk carriers (液體散裝船)",
+        "Liquefied petroleum gas carriers": "Liquefied petroleum gas carriers (液化石油氣船)",
+        "Liquefied natural gas carriers": "Liquefied natural gas carriers (液化天然氣船)",
+        "Dry bulk carriers": "Dry bulk carriers (乾散裝船)",
+        "Dry breakbulk carriers": "Dry breakbulk carriers (雜貨船)",
+        "Container ships": "Container ships (貨櫃船)"
     }
-    scatter_df['Vessel_Type_CN'] = scatter_df['CommercialMarket_Label'].map(vessel_type_cn).fillna(scatter_df['CommercialMarket_Label'])
+    scatter_df['Vessel_Type_Combined'] = scatter_df['CommercialMarket_Label'].map(vessel_type_combined).fillna(scatter_df['CommercialMarket_Label'])
 
     fig_scatter = px.scatter(
         scatter_df,
         x='Average_size_GT_of_vessels_Value',
         y='Average_cargo_carrying_capacity_dwt_per_vessel_Value',
         size='Average_size_GT_of_vessels_Value',
-        color='Vessel_Type_CN',  # 圖例也改成中文！
+        color='Vessel_Type_Combined',
         labels={
             'Average_size_GT_of_vessels_Value': '平均船舶總噸位 (Average Size GT)',
-            'Average_cargo_carrying_capacity_dwt_per_vessel_Value': '平均載重噸位 (Average DWT - 船隻能載多重的貨)',
-            'Vessel_Type_CN': '船舶類型'
+            'Average_cargo_carrying_capacity_dwt_per_vessel_Value': '平均載重噸位 (Average DWT)',
+            'Vessel_Type_Combined': '船舶類型 (Vessel Type)'
         },
         title="🔮 停靠船型之規模 (GT) 與實際載重能力 (DWT) 交叉關聯圖"
     )
-    fig_scatter.update_layout(font=dict(size=16), title_font=dict(size=20))
+    fig_scatter.update_layout(font=dict(size=15), title_font=dict(size=20))
     st.plotly_chart(fig_scatter, use_container_width=True)
 else:
     st.info("💡 該國家/地區缺少船隻噸位與載重能力的對應數據。")
@@ -176,52 +175,4 @@ st.markdown("---")
 # 7. 數據統計摘要與明細
 st.markdown("### 📋 數據科學統計摘要與原始明細")
 
-tab1, tab2 = st.tabs(["🔍 資料敘述性統計 (Kaggle EDA 經典特徵)", "📋 原始篩選數據明細 (Excel 樣式表格)"])
-
-with tab1:
-    st.markdown("#### 📝 目前篩選數據的數值特徵摘要 (Summary Statistics)")
-    if not filtered_df.empty:
-        # 顯示統計摘要表格
-        st.dataframe(
-            filtered_df.describe().T, 
-            use_container_width=True, 
-            height=320,
-            column_config={
-                "count": "📊 樣本筆數 (Count)",
-                "mean": "📈 平均值 (Mean)",
-                "std": "📉 標準差 (Std)",
-                "min": "⬇️ 最小值 (Min)",
-                "25%": "¼ 25%分位數",
-                "50%": "🌓 中位數 (50%)",
-                "75%": "¾ 75%分位數",
-                "max": "⬆️ 最大值 (Max)"
-            }
-        )
-        
-        st.markdown("---")
-        st.markdown("### 📖 表格左側【海運英文專有名詞】中文白話文對照解釋")
-        
-        st.info("""
-        * **`Average_age_of_vessels_years_Value`**
-          * ➡️ **【停靠船舶平均船齡】**：代表前來停靠的所有船隻平均年齡（歲）。
-        * **`Median_time_in_port_days_Value`**
-          * ➡️ **【船舶在港停留時間中位數】**：代表船隻進港到離開（含排隊、裝卸、出港）所花費的天數。為衡量塞港最核心的指標。
-        * **`Average_size_GT_of_vessels_Value`**
-          * ➡️ **【平均船舶總噸位】**：Gross Tonnage (GT) 代表船隻的總內部體積空間。數字愈大，代表來的船體積規模愈大。
-        * **`Average_cargo_carrying_capacity_dwt_per_vessel_Value`**
-          * ➡️ **【平均船舶載重噸位】**：Deadweight Tonnage (DWT) 代表船隻實際「能載運的貨物總重量」。
-        * **`Average_container_carrying_capacity_TEU_per_container_ship_Value`**
-          * ➡️ **【貨櫃船平均運載量 (TEU)】**：TEU 代表 20 呎標準貨櫃。此指標代表平均一艘貨櫃船能載多少個標準箱。
-        * **`Maximum_size_GT_of_vessels_Value`**
-          * ➡️ **【停靠最大船舶總噸位】**：觀測期間內，該港口接待過體積最大（GT 最大）的那一艘超級巨輪。
-        * **`Maximum_cargo_carrying_capacity_dwt_of_vessels_Value`**
-          * ➡️ **【停靠最大船舶載重噸位】**：觀測期間內，該港口接待過載貨重量最重（DWT 最大）的那一艘超級巨輪。
-        * **`Maximum_container_carrying_capacity_TEU_of_container_ships_Value`**
-          * ➡️ **【停靠最大貨櫃船運載量 (TEU)】**：觀測期間內，該港口接待過能載最多貨櫃箱的巨無霸貨櫃船容量。
-        """)
-    else:
-        st.write("無資料。")
-
-with tab2:
-    st.markdown("#### 📝 原始資料表格明細 (提供下載與線性審查)")
-    st.dataframe(filtered_df, use_container_width=True, height=400)
+tab1, tab2 = st.tabs(
