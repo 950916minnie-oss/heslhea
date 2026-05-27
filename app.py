@@ -2,12 +2,28 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# 1. 網頁基本設定與安全的字體放大 CSS
+# 1. 網頁基本設定與【精準微調】CSS (移除會誤傷標題 span 的 !important 限制)
 st.set_page_config(page_title="全球港口壅塞效率與分析系統", layout="wide")
 st.markdown("""
     <style>
-    /* 放大一般內文與列表字體 */
-    p, li, a, span { font-size: 20px !important; line-height: 1.6 !important; }
+    /* 建立大標題專用的超級放大樣式 */
+    .super-title {
+        font-size: 46px !important;
+        font-weight: bold !important;
+        color: #1E3A8A !important;
+        line-height: 1.3 !important;
+        display: block;
+        margin-bottom: 15px;
+    }
+    /* 建立副標題專用的放大樣式 */
+    .super-sub {
+        font-size: 30px !important;
+        font-weight: bold !important;
+        color: #4B5563 !important;
+        line-height: 1.4 !important;
+        display: block;
+        margin-bottom: 20px;
+    }
     /* 放大側邊欄文字 */
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label { font-size: 20px !important; }
     /* 放大 KPI 卡片數字與標籤 */
@@ -18,9 +34,9 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 🔥【究極復活】捨棄 HTML 拼接，改用 100% 官方標準大標題函數，字體絕對回歸！
-st.title("🚢 全球海運港口績效與船舶效率分析系統")
-st.subheader("副標題：港口壅塞效率與分析 —— 基於 UNCTAD 航運大數據")
+# 🔥 使用專屬的 class 避開全域 CSS 干擾，字體 100% 絕對變大！
+st.markdown('<span class="super-title">🚢 全球海運港口績效與船舶效率分析系統</span>', unsafe_allow_html=True)
+st.markdown('<span class="super-sub">副標題：港口壅塞效率與分析 —— 基於 UNCTAD 航運大數據</span>', unsafe_allow_html=True)
 st.write("數據來源：聯合國貿易和發展會議 (UNCTAD) 官方統計資料 (2022-2023)")
 st.markdown("---")
 
