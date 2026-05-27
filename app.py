@@ -78,4 +78,36 @@ col1, col2, col3 = st.columns(3)
 if not all_ships_data.empty:
     with col1:
         val1 = all_ships_data['Median_time_in_port_days_Value'].values[0]
-        st.metric(label="⏱️ 船舶在港停留時間中位數", value=f"{val1} 天" if
+        txt1 = f"{val1} 天" if pd.notna(val1) else "無資料"
+        st.metric(label="⏱️ 船舶在港停留時間中位數", value=txt1)
+    with col2:
+        val2 = all_ships_data['Average_age_of_vessels_years_Value'].values[0]
+        txt2 = f"{val2} 年" if pd.notna(val2) else "無資料"
+        st.metric(label="⏳ 停靠船舶平均船齡", value=txt2)
+    with col3:
+        val3 = all_ships_data['Average_size_GT_of_vessels_Value'].values[0]
+        txt3 = f"{val3:,.0f} 噸" if pd.notna(val3) else "無資料"
+        st.metric(label="⚖️ 平均船舶總噸位 (GT)", value=txt3)
+else:
+    st.warning("⚠️ 該國家在此期間內無綜合 (All ships) 數據。")
+
+st.markdown("---")
+
+# 5. 港口壅塞度與時間對比 (長條圖優化)
+st.markdown("### 📈 各船型在港停留時間對比 (橫向壅塞效率分析)")
+if not vessel_comparison_df.empty:
+    chart1_df = vessel_comparison_df.dropna(subset=['Median_time_in_port_days_Value'])
+    if not chart1_df.empty:
+        fig_time = px.bar(
+            chart1_df,
+            x='CommercialMarket_Label',
+            y='Median_time_in_port_days_Value',
+            labels={'CommercialMarket_Label': '船舶類型 (Vessel Type)', 'Median_time_in_port_days_Value': '在港停留天數中位數 (Days)'},
+            color='Median_time_in_port_days_Value',
+            color_continuous_scale='Reds',
+            title="🏆 各類型船隻卡在港口的天數"
+        )
+        fig_time.update_layout(font=dict(size=16), title_font=dict(size=20))
+        st.plotly_chart(fig_time, use_container_width=True)
+    else:
+        st.info("💡 該地區在此
