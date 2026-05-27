@@ -72,13 +72,4 @@ vessel_comparison_df = filtered_df[filtered_df['CommercialMarket_Label'] != 'All
 # 4. 關鍵績效指標 (KPI 分類總覽)
 st.markdown(f"### 📊 觀測焦點：{selected_economy} 在 {selected_period} 的核心數據總覽")
 
-all_ships_data = filtered_df[filtered_df['CommercialMarket_Label'] == 'All ships']
-
-col1, col2, col3 = st.columns(3)
-if not all_ships_data.empty:
-    with col1:
-        val1 = all_ships_data['Median_time_in_port_days_Value'].values[0]
-        st.metric(label="⏱️ 船舶在港停留時間中位數", value=f"{val1} 天" if pd.notna(val1) else "無資料")
-    with col2:
-        val2 = all_ships_data['Average_age_of_vessels_years_Value'].values[0]
-        st.metric(label="⏳ 停靠船舶平均船齡", value=f"{val2} 年" if pd.notna(val2) else "無
+all_ships_data = filtered_df[filtered_df['CommercialMarket_Label'] == 'All ships
