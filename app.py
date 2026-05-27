@@ -8,16 +8,13 @@ st.set_page_config(page_title="全球港口壅塞效率與分析系統", layout=
 # =================【最新表格專屬放大 CSS 區塊】=================
 st.markdown("""
     <style>
-    /* 1. 強制放大全網頁基礎文字 */
     html, body, p, div, span, li, a {
         font-size: 20px !important; 
         line-height: 1.6 !important;
     }
-    /* 2. 強制放大側邊欄文字 */
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
         font-size: 20px !important;
     }
-    /* 3. 強制放大大數字欄位 (st.metric) */
     [data-testid="stMetricValue"] {
         font-size: 40px !important; 
         font-weight: bold !important;
@@ -25,8 +22,6 @@ st.markdown("""
     [data-testid="stMetricLabel"] p {
         font-size: 22px !important;
     }
-    
-    /* 強制穿透並放大 st.dataframe 表格內部的所有中英文字體與欄位名 */
     [data-testid="stDataFrame"] *, .glideDataGrid-canvas, [role="gridcell"] {
         font-size: 18px !important;
     }
@@ -151,6 +146,25 @@ tab1, tab2 = st.tabs(["🔍 資料敘述性統計 (Kaggle EDA 經典特徵)", "�
 with tab1:
     st.markdown("#### 📝 目前篩選數據的數值特徵摘要 (Summary Statistics)")
     if not filtered_df.empty:
-        # 完美的橫向中文化設定
+        # 表格橫向標題中文化
         st.dataframe(
-            filtered_df.describe
+            filtered_df.describe().T, 
+            use_container_width=True, 
+            height=350,
+            column_config={
+                "count": "📊 樣本筆數 (Count)",
+                "mean": "📈 平均值 (Mean)",
+                "std": "📉 標準差 (Std)",
+                "min": "⬇️ 最小值 (Min)",
+                "25%": "¼ 25%分位數",
+                "50%": "🌓 中位數 (50%)",
+                "75%": "¾ 75%分位數",
+                "max": "⬆️ 最大值 (Max)"
+            }
+        )
+    else:
+        st.write("無資料。")
+
+with tab2:
+    st.markdown("#### 📝 原始資料表格明細 (提供下載與線性審查)")
+    st.dataframe(filtered_df, use_container_width=True, height=400)
