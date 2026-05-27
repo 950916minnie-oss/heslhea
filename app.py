@@ -2,11 +2,11 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# 1. 網頁基本設定與【精準微調】CSS (移除會誤傷標題 span 的 !important 限制)
+# 1. 網頁基本設定與【視覺層級優化】CSS 
 st.set_page_config(page_title="全球港口壅塞效率與分析系統", layout="wide")
 st.markdown("""
     <style>
-    /* 建立大標題專用的超級放大樣式 */
+    /* 1. 主標題與副標題：維持最顯眼、最有氣勢的大字 */
     .super-title {
         font-size: 46px !important;
         font-weight: bold !important;
@@ -15,7 +15,6 @@ st.markdown("""
         display: block;
         margin-bottom: 15px;
     }
-    /* 建立副標題專用的放大樣式 */
     .super-sub {
         font-size: 30px !important;
         font-weight: bold !important;
@@ -24,17 +23,23 @@ st.markdown("""
         display: block;
         margin-bottom: 20px;
     }
-    /* 放大側邊欄文字 */
+    
+    /* 2. 🔥【三大指標數據調小】調降 st.metric 的大小，絕對不搶主標題風采 */
+    [data-testid="stMetricValue"] { 
+        font-size: 30px !important; /* 從 40px 縮小到 30px，更精緻、不刺眼 */
+        font-weight: bold !important; 
+    }
+    [data-testid="stMetricLabel"] p { 
+        font-size: 18px !important; /* 標籤文字同步微調 */
+    }
+    
+    /* 3. 側邊欄與表格文字 */
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label { font-size: 20px !important; }
-    /* 放大 KPI 卡片數字與標籤 */
-    [data-testid="stMetricValue"] { font-size: 40px !important; font-weight: bold !important; }
-    [data-testid="stMetricLabel"] p { font-size: 22px !important; }
-    /* 放大表格內文字體 */
     [data-testid="stDataFrame"] *, .glideDataGrid-canvas, [role="gridcell"] { font-size: 18px !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# 🔥 使用專屬的 class 避開全域 CSS 干擾，字體 100% 絕對變大！
+# 頂端標題區
 st.markdown('<span class="super-title">🚢 全球海運港口績效與船舶效率分析系統</span>', unsafe_allow_html=True)
 st.markdown('<span class="super-sub">副標題：港口壅塞效率與分析 —— 基於 UNCTAD 航運大數據</span>', unsafe_allow_html=True)
 st.write("數據來源：聯合國貿易和發展會議 (UNCTAD) 官方統計資料 (2022-2023)")
