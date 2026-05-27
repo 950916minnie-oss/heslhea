@@ -8,13 +8,16 @@ st.set_page_config(page_title="全球港口壅塞效率與分析系統", layout=
 # =================【最新表格專屬放大 CSS 區塊】=================
 st.markdown("""
     <style>
+    /* 1. 強制放大全網頁基礎文字 */
     html, body, p, div, span, li, a {
         font-size: 20px !important; 
         line-height: 1.6 !important;
     }
+    /* 2. 強制放大側邊欄文字 */
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
         font-size: 20px !important;
     }
+    /* 3. 強制放大大數字欄位 (st.metric) */
     [data-testid="stMetricValue"] {
         font-size: 40px !important; 
         font-weight: bold !important;
@@ -22,6 +25,8 @@ st.markdown("""
     [data-testid="stMetricLabel"] p {
         font-size: 22px !important;
     }
+    
+    /* 強制穿透並放大 st.dataframe 表格內部的所有中英文字體與欄位名 */
     [data-testid="stDataFrame"] *, .glideDataGrid-canvas, [role="gridcell"] {
         font-size: 18px !important;
     }
@@ -69,7 +74,6 @@ st.markdown(f"### 📊 觀測焦點：{selected_economy} 在 {selected_period} �
 
 all_ships_data = filtered_df[filtered_df['CommercialMarket_Label'] == 'All ships']
 
-# 這裡改用最安全、最不會殘留碎片的寫法
 if not all_ships_data.empty:
     val1 = all_ships_data['Median_time_in_port_days_Value'].values[0]
     val2 = all_ships_data['Average_age_of_vessels_years_Value'].values[0]
@@ -77,3 +81,6 @@ if not all_ships_data.empty:
     
     txt1 = f"{val1} 天" if pd.notna(val1) else "無資料"
     txt2 = f"{val2} 年" if pd.notna(val2) else "無資料"
+    txt3 = f"{val3:,.0f} 噸" if pd.notna(val3) else "無資料"
+    
+    col
