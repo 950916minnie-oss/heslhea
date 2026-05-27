@@ -5,24 +5,40 @@ import plotly.express as px
 # 1. 網頁基本設定 (開啟寬螢幕模式)
 st.set_page_config(page_title="全球港口壅塞效率與分析系統", layout="wide")
 
-# 透過 CSS 注入：放大網頁所有基礎文字與側邊欄字體
+# =================【最新強力放大字體 CSS 區塊】=================
 st.markdown("""
     <style>
-    html, body, [data-testid="stWidgetLabel"] p {
-        font-size: 18px !important; /* 放大標籤字體 */
+    /* 1. 強制放大全網頁所有文字、內文、段落 */
+    html, body, p, div, span, li, a {
+        font-size: 20px !important; 
+        line-height: 1.6 !important;
     }
-    .stMarkdown p {
-        font-size: 18px !important; /* 放大內文字體 */
+    /* 2. 強制放大側邊欄的所有控制選單與文字 */
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
+        font-size: 20px !important;
+    }
+    /* 3. 強制放大三個大數字欄位 (st.metric) 的數值大小 */
+    [data-testid="stMetricValue"] {
+        font-size: 40px !important; 
+        font-weight: bold !important;
+    }
+    /* 4. 強制放大大數字欄位的標題文字 */
+    [data-testid="stMetricLabel"] p {
+        font-size: 22px !important;
+    }
+    /* 5. 強制放大下拉選單內選項的字體 */
+    div[data-baseweb="select"] * {
+        font-size: 18px !important;
     }
     </style>
     """, unsafe_allow_html=True)
+# =============================================================
 
-# 網頁大標題與副標題
-st.title("🚢 全球海運港口績效與船舶效率分析系統")
-st.markdown("## **副標題：港口壅塞效率與分析 —— 基於 UNCTAD 航運大數據**")
+# 網頁大標題與副標題 (這裡也幫你加上強制放大的 HTML 標籤)
+st.markdown("<h1 style='font-size: 42px !important;'>🚢 全球海運港口績效與船舶效率分析系統</h1>", unsafe_allow_html=True)
+st.markdown("<h2 style='font-size: 30px !important;'><b>副標題：港口壅塞效率與分析 —— 基於 UNCTAD 航運大數據</b></h2>", unsafe_allow_html=True)
 st.markdown("數據來源：聯合國貿易和發展會議 (UNCTAD) 官方統計資料 (2022-2023)")
 st.markdown("---")
-
 # 2. 讀取與快取資料
 @st.cache_data
 def load_data():
