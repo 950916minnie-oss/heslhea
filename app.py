@@ -53,9 +53,4 @@ all_ships_data = filtered_df[filtered_df['CommercialMarket_Label'] == 'All ships
 
 if not all_ships_data.empty:
     val1 = all_ships_data['Median_time_in_port_days_Value'].values[0]
-    val2 = all_ships_data['Average_age_of_vessels_years_Value'].values[0]
-    val3 = all_ships_data['Average_size_GT_of_vessels_Value'].values[0]
-    
-    col1, col2, col3 = st.columns(3)
-    with col1: st.metric(label="⏱️ 船舶在港停留時間中位數", value=f"{val1} 天" if pd.notna(val1) else "無資料")
-    with col2: st.metric(label="⏳ 停靠船舶平均船齡", value=
+    val2 = all_ships_data
