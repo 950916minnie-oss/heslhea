@@ -110,4 +110,47 @@ if not vessel_comparison_df.empty:
         fig_time.update_layout(font=dict(size=16), title_font=dict(size=20))
         st.plotly_chart(fig_time, use_container_width=True)
     else:
-        st.info("💡 該地區在此
+        st.info("💡 該地區在此期間內無個別船型詳細數據。")
+else:
+    st.info("💡 無個別船型資料。")
+
+st.markdown("---")
+
+# 6. 船舶載重能力與噸位分析
+st.markdown("### 🚢 船舶載運規模與載重噸位 (DWT) 關聯分析")
+st.markdown("*(數據科學解讀：此圖呈現不同船型的平均總噸位 GT 與載重能力 DWT 的線性關係，圓點越大代表船隻物理體積越大。)*")
+
+scatter_df = vessel_comparison_df.dropna(subset=['Average_size_GT_of_vessels_Value', 'Average_cargo_carrying_capacity_dwt_per_vessel_Value'])
+
+if not scatter_df.empty:
+    fig_scatter = px.scatter(
+        scatter_df,
+        x='Average_size_GT_of_vessels_Value',
+        y='Average_cargo_carrying_capacity_dwt_per_vessel_Value',
+        size='Average_size_GT_of_vessels_Value',
+        color='CommercialMarket_Label',
+        labels={
+            'Average_size_GT_of_vessels_Value': '平均船舶總噸位 (Average Size GT)',
+            'Average_cargo_carrying_capacity_dwt_per_vessel_Value': '平均載重噸位 (Average DWT - 船隻能載多重的貨)',
+            'CommercialMarket_Label': '船舶類型'
+        },
+        title="🔮 停靠船型之規模 (GT) 與實際載重能力 (DWT) 交叉關聯圖"
+    )
+    fig_scatter.update_layout(font=dict(size=16), title_font=dict(size=20))
+    st.plotly_chart(fig_scatter, use_container_width=True)
+else:
+    st.info("💡 該國家/地區缺少船隻噸位與載重能力的對應數據。")
+
+st.markdown("---")
+
+# 7. 數據統計摘要與明細
+st.markdown("### 📋 數據科學統計摘要與原始明細")
+
+tab1, tab2 = st.tabs(["🔍 資料敘述性統計 (Kaggle EDA 經典特徵)", "📋 原始篩選數據明細 (Excel 樣式表格)"])
+
+with tab1:
+    st.markdown("#### 📝 目前篩選數據的數值特徵摘要 (Summary Statistics)")
+    if not filtered_df.empty:
+        # 完美的橫向中文化設定
+        st.dataframe(
+            filtered_df.describe
