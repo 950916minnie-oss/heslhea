@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# 1. 網頁設定與大字體 CSS
+# 1. 網頁基本設定與字體放大 CSS
 st.set_page_config(page_title="全球港口壅塞效率與分析系統", layout="wide")
 st.markdown("""
     <style>
@@ -15,13 +15,13 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 大標題與副標題正常顯示
+# 顯示最上方的大標題與副標題
 st.markdown("<h1 style='font-size: 42px !important;'>🚢 全球海運港口績效與船舶效率分析系統</h1>", unsafe_allow_html=True)
 st.markdown("<h2 style='font-size: 30px !important;'><b>副標題：港口壅塞效率與分析 —— 基於 UNCTAD 航運大數據</b></h2>", unsafe_allow_html=True)
 st.markdown("數據來源：聯合國貿易和發展會議 (UNCTAD) 官方統計資料 (2022-2023)")
 st.markdown("---")
 
-# 2. 讀取資料
+# 2. 讀取與處理資料
 @st.cache_data
 def load_data():
     df = pd.read_csv("Maritime Port Performance Project Dataset.csv")
@@ -33,7 +33,7 @@ def load_data():
 
 df = load_data()
 
-# 3. 側邊欄篩選
+# 3. 側邊欄互動篩選器
 st.sidebar.markdown("# 🔍 觀測條件設定")
 all_economies = sorted(df['Economy_Label'].unique())
 selected_economy = st.sidebar.selectbox("💡 請選擇觀測國家/地區", all_economies, index=all_economies.index('World') if 'World' in all_economies else 0)
@@ -41,7 +41,21 @@ selected_economy = st.sidebar.selectbox("💡 請選擇觀測國家/地區", all
 all_periods = sorted(df['period'].unique())
 selected_period = st.sidebar.selectbox("💡 請選擇統計期間", all_periods)
 
+# 過濾資料
 filtered_df = df[(df['Economy_Label'] == selected_economy) & (df['period'] == selected_period)]
 vessel_comparison_df = filtered_df[filtered_df['CommercialMarket_Label'] != 'All ships']
 
-# 4. 關鍵績效
+# ==================== 網頁主內容區 ====================
+
+# 4. 關鍵績效指標 (KPI 三個大字卡)
+st.markdown(f"### 📊 觀測焦點：{selected_economy} 在 {selected_period} 的核心數據總覽")
+all_ships_data = filtered_df[filtered_df['CommercialMarket_Label'] == 'All ships']
+
+if not all_ships_data.empty:
+    val1 = all_ships_data['Median_time_in_port_days_Value'].values[0]
+    val2 = all_ships_data['Average_age_of_vessels_years_Value'].values[0]
+    val3 = all_ships_data['Average_size_GT_of_vessels_Value'].values[0]
+    
+    col1, col2, col3 = st.columns(3)
+    with col1: st.metric(label="⏱️ 船舶在港停留時間中位數", value=f"{val1} 天" if pd.notna(val1) else "無資料")
+    with col2: st.metric(label="⏳ 停靠船舶平均船齡", value=
