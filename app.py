@@ -8,13 +8,16 @@ st.set_page_config(page_title="全球港口壅塞效率與分析系統", layout=
 # =================【最新表格專屬放大 CSS 區塊】=================
 st.markdown("""
     <style>
+    /* 1. 強制放大全網頁基礎文字 */
     html, body, p, div, span, li, a {
         font-size: 20px !important; 
         line-height: 1.6 !important;
     }
+    /* 2. 強制放大側邊欄文字 */
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
         font-size: 20px !important;
     }
+    /* 3. 強制放大大數字欄位 (st.metric) */
     [data-testid="stMetricValue"] {
         font-size: 40px !important; 
         font-weight: bold !important;
@@ -22,6 +25,8 @@ st.markdown("""
     [data-testid="stMetricLabel"] p {
         font-size: 22px !important;
     }
+    
+    /* 強制穿透並放大 st.dataframe 表格內部的所有中英文字體與欄位名 */
     [data-testid="stDataFrame"] *, .glideDataGrid-canvas, [role="gridcell"] {
         font-size: 18px !important;
     }
@@ -146,20 +151,20 @@ tab1, tab2 = st.tabs(["🔍 資料敘述性統計 (Kaggle EDA 經典特徵)", "�
 with tab1:
     st.markdown("#### 📝 目前篩選數據的數值特徵摘要 (Summary Statistics)")
     if not filtered_df.empty:
-        # 表格橫向標題中文化
+        # 🔥【大優化】強制指定格子寬度為 200，保證中文绝对不會被擠掉、絕對能看見！
         st.dataframe(
             filtered_df.describe().T, 
             use_container_width=True, 
-            height=350,
+            height=380,
             column_config={
-                "count": "📊 樣本筆數 (Count)",
-                "mean": "📈 平均值 (Mean)",
-                "std": "📉 標準差 (Std)",
-                "min": "⬇️ 最小值 (Min)",
-                "25%": "¼ 25%分位數",
-                "50%": "🌓 中位數 (50%)",
-                "75%": "¾ 75%分位數",
-                "max": "⬆️ 最大值 (Max)"
+                "count": st.column_config.TextColumn("📊 樣本筆數", width=200),
+                "mean": st.column_config.TextColumn("📈 平均值", width=200),
+                "std": st.column_config.TextColumn("📉 標準差", width=200),
+                "min": st.column_config.TextColumn("⬇️ 最小值", width=180),
+                "25%": st.column_config.TextColumn("¼ 25%分位", width=180),
+                "50%": st.column_config.TextColumn("🌓 中位數", width=180),
+                "75%": st.column_config.TextColumn("¾ 75%分位", width=180),
+                "max": st.column_config.TextColumn("⬆️ 最大值", width=180)
             }
         )
     else:
