@@ -2,23 +2,19 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# 1. 網頁基本設定與安全的字體放大 CSS (移除會波及 div 的錯誤設定)
+# 1. 網頁基本設定與安全的字體放大 CSS
 st.set_page_config(page_title="全球港口壅塞效率與分析系統", layout="wide")
 st.markdown("""
     <style>
-    /* 放大一般內文與列表字體 */
     p, li, a, span { font-size: 20px !important; line-height: 1.6 !important; }
-    /* 放大側邊欄文字 */
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label { font-size: 20px !important; }
-    /* 放大 KPI 卡片數字與標籤 */
     [data-testid="stMetricValue"] { font-size: 40px !important; font-weight: bold !important; }
     [data-testid="stMetricLabel"] p { font-size: 22px !important; }
-    /* 放大表格內文字體 */
     [data-testid="stDataFrame"] *, .glideDataGrid-canvas, [role="gridcell"] { font-size: 18px !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# 使用完全獨立且不受干擾的 HTML 標籤呈現超級大標題
+# 標題與副標題設定
 st.markdown("<div style='text-align: left; margin-bottom: 10px;'><span style='font-size: 45px !important; font-weight: bold !important; color: #1E3A8A;'>🚢 全球海運港口績效與船舶效率分析系統</span></div>", unsafe_allow_html=True)
 st.markdown("<div style='text-align: left; margin-bottom: 20px;'><span style='font-size: 30px !important; font-weight: bold !important; color: #4B5563;'>副標題：港口壅塞效率與分析 —— 基於 UNCTAD 航運大數據</span></div>", unsafe_allow_html=True)
 st.markdown("數據來源：聯合國貿易和發展會議 (UNCTAD) 官方統計資料 (2022-2023)")
@@ -66,4 +62,55 @@ else:
 st.markdown("---")
 
 # 5. 各船型在港停留時間長條圖
-st.markdown("### 📈 各船型在港停留
+st.markdown("### 📈 各船型在港停留時間對比 (橫向壅塞效率分析)")
+if not vessel_comparison_df.empty:
+    chart1_df = vessel_comparison_df.dropna(subset=['Median_time_in_port_days_Value']).copy()
+    if not chart1_df.empty:
+        cmap = {
+            "Liquid bulk carriers": "Liquid bulk carriers<br>(液體散裝/油輪)",
+            "Liquefied petroleum gas carriers": "LPG carriers<br>(液化石油氣船)",
+            "Liquefied natural gas carriers": "LNG carriers<br>(液化天然氣船)",
+            "Dry bulk carriers": "Dry bulk carriers<br>(乾散裝船/穀物)",
+            "Dry breakbulk carriers": "Dry breakbulk<br>(雜貨船/散裝箱)",
+            "Container ships": "Container ships<br>(貨櫃船/標準箱)"
+        }
+        chart1_df['Type_CN'] = chart1_df['CommercialMarket_Label'].map(cmap).fillna(chart1_df['CommercialMarket_Label'])
+        
+        fig_time = px.bar(
+            chart1_df, x='Type_CN', y='Median_time_in_port_days_Value',
+            labels={'Type_CN': '船舶類型', 'Median_time_in_port_days_Value': '在港停留天數中位數 (Days)'},
+            color='Median_time_in_port_days_Value', color_continuous_scale='Reds'
+        )
+        fig_time.update_coloraxes(colorbar_title_text="在港天數")
+        fig_time.update_xaxes(tickangle=0) 
+        fig_time.update_layout(font=dict(size=14))
+        st.plotly_chart(fig_time, use_container_width=True)
+else:
+    st.info("💡 提示：『World』僅包含綜合統計，切換至特定國家（如 United States of America）即可看細分船型圖。")
+
+st.markdown("---")
+
+# 6. 數據統計摘要與明細 (含藍色名詞解釋框)
+st.markdown("### 📋 數據科學統計摘要與原始明細")
+tab1, tab2 = st.tabs(["🔍 資料敘述性統計", "📋 原始篩選數據明細"])
+
+with tab1:
+    if not filtered_df.empty:
+        st.dataframe(filtered_df.describe().T, use_container_width=True, height=260, column_config={
+            "count": "📊 樣本筆數", "mean": "📈 平均值", "std": "📉 標準差",
+            "min": "⬇️ 最小值", "25%": "¼ 25%分位", "50%": "🌓 中位數", "75%": "¾ 75%分位", "max": "⬆️ 最大值"
+        })
+        st.markdown("---")
+        st.info("""
+        * **`Average_age_of_vessels_years_Value`** ➡️ **【停靠船舶平均船齡】**：停靠船隻的平均年齡（歲）。
+        * **`Median_time_in_port_days_Value`** ➡️ **【船舶在港停留時間中位數】**：進港到排隊離開總天數。
+        * **`Average_size_GT_of_vessels_Value`** ➡️ **【平均船舶總噸位】**：Gross Tonnage 船隻內部總體積空間。
+        * **`Average_cargo_carrying_capacity_dwt_per_vessel_Value`** ➡️ **【平均船舶載重噸位】**：Deadweight Tonnage 實際能載重。
+        * **`Average_container_carrying_capacity_TEU_per_container_ship_Value`** ➡️ **【貨櫃船平均運載量 (TEU)】**：平均能載多少個20呎標準箱。
+        * **`Maximum_size_GT_of_vessels_Value`** ➡️ **【停靠最大船舶總噸位】**：接待過體積最大的超級巨輪規模。
+        * **`Maximum_cargo_carrying_capacity_dwt_of_vessels_Value`** ➡️ **【停靠最大船舶載重噸位】**：接待過載貨最重的超級巨輪重量。
+        * **`Maximum_container_carrying_capacity_TEU_of_container_ships_Value`** ➡️ **【停靠最大貨櫃船運載量 (TEU)】**：接待過載箱數最多的超級貨櫃船。
+        """)
+
+with tab2:
+    if not filtered_df.empty: st.dataframe(filtered_df, use_container_width=True, height=260)
