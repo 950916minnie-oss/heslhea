@@ -2,11 +2,11 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# 1. 網頁基本設定與【視覺層級優化】CSS 
+# 1. 網頁基本設定與視覺層級優化 CSS
 st.set_page_config(page_title="全球港口壅塞效率與分析系統", layout="wide")
 st.markdown("""
     <style>
-    /* 1. 主標題與副標題：維持最顯眼、最有氣勢的大字 */
+    /* 主標題與副標題：維持最顯眼、最有氣勢的大字 */
     .super-title {
         font-size: 46px !important;
         font-weight: bold !important;
@@ -23,17 +23,15 @@ st.markdown("""
         display: block;
         margin-bottom: 20px;
     }
-    
-    /* 2. 🔥【三大指標數據調小】調降 st.metric 的大小，絕對不搶主標題風采 */
+    /* 三大指標數據調小，絕對不搶主標題風采 */
     [data-testid="stMetricValue"] { 
-        font-size: 30px !important; /* 從 40px 縮小到 30px，更精緻、不刺眼 */
+        font-size: 30px !important; 
         font-weight: bold !important; 
     }
     [data-testid="stMetricLabel"] p { 
-        font-size: 18px !important; /* 標籤文字同步微調 */
+        font-size: 18px !important; 
     }
-    
-    /* 3. 側邊欄與表格文字 */
+    /* 側邊欄與表格文字 */
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label { font-size: 20px !important; }
     [data-testid="stDataFrame"] *, .glideDataGrid-canvas, [role="gridcell"] { font-size: 18px !important; }
     </style>
@@ -115,27 +113,45 @@ else:
 
 st.markdown("---")
 
-# 6. 數據統計摘要與明細 (含藍色名詞解釋框)
+# 6. 🔥【氣泡圖大復活】船舶載重能力與噸位分析 (氣泡圖完整畫圖邏輯)
+st.markdown("### 🚢 船舶載運規模與載重噸位 (DWT) 關聯分析")
+st.markdown("*(數據科學解讀：此圖呈現不同船型的平均總噸位 GT 與載重能力 DWT 的線性關係，圓點越大代表船隻物理體積越大。)*")
+
+if not vessel_comparison_df.empty:
+    scatter_df = vessel_comparison_df.dropna(subset=['Average_size_GT_of_vessels_Value', 'Average_cargo_carrying_capacity_dwt_per_vessel_Value']).copy()
+    if not scatter_df.empty:
+        vessel_type_scatter = {
+            "Liquid bulk carriers": "Liquid bulk carriers (液體散裝船)",
+            "Liquefied petroleum gas carriers": "LPG carriers (液化石油氣船)",
+            "Liquefied natural gas carriers": "LNG carriers (液化天然氣船)",
+            "Dry bulk carriers": "Dry bulk carriers (乾散裝船)",
+            "Dry breakbulk carriers": "Dry breakbulk (雜貨船)",
+            "Container ships": "Container ships (貨櫃船)"
+        }
+        scatter_df['Type_Scatter_CN'] = scatter_df['CommercialMarket_Label'].map(vessel_type_scatter).fillna(scatter_df['CommercialMarket_Label'])
+
+        fig_scatter = px.scatter(
+            scatter_df, x='Average_size_GT_of_vessels_Value', y='Average_cargo_carrying_capacity_dwt_per_vessel_Value',
+            size='Average_size_GT_of_vessels_Value', color='Type_Scatter_CN',
+            labels={
+                'Average_size_GT_of_vessels_Value': '平均船舶總噸位 (Average Size GT)',
+                'Average_cargo_carrying_capacity_dwt_per_vessel_Value': '平均載重噸位 (Average DWT)',
+                'Type_Scatter_CN': '船舶類型 (Vessel Type)'
+            },
+            title="🔮 停靠船型之規模 (GT) 與實際載重能力 (DWT) 交叉關聯圖"
+        )
+        fig_scatter.update_layout(font=dict(size=14), title_font=dict(size=18))
+        st.plotly_chart(fig_scatter, use_container_width=True) # 之前就是漏掉這一行！補回來了！
+    else:
+        st.info("💡 該觀測條件下缺少船隻噸位與載重能力的對應數據。")
+else:
+    st.info("💡 提示：『World』無細分船型交叉氣泡圖。切換至具體國家（如 United States of America）即可顯示。")
+
+st.markdown("---")
+
+# 7. 數據統計摘要與明細 (含藍色名詞解釋框)
 st.markdown("### 📋 數據科學統計摘要與原始明細")
 tab1, tab2 = st.tabs(["🔍 資料敘述性統計", "📋 原始篩選數據明細"])
 
 with tab1:
-    if not filtered_df.empty:
-        st.dataframe(filtered_df.describe().T, use_container_width=True, height=260, column_config={
-            "count": "📊 樣本筆數", "mean": "📈 平均值", "std": "📉 標準差",
-            "min": "⬇️ 最小值", "25%": "¼ 25%分位", "50%": "🌓 中位數", "75%": "¾ 75%分位", "max": "⬆️ 最大值"
-        })
-        st.markdown("---")
-        st.info("""
-        * **`Average_age_of_vessels_years_Value`** ➡️ **【停靠船舶平均船齡】**：停靠船隻的平均年齡（歲）。
-        * **`Median_time_in_port_days_Value`** ➡️ **【船舶在港停留時間中位數】**：進港到排隊離開總天數。
-        * **`Average_size_GT_of_vessels_Value`** ➡️ **【平均船舶總噸位】**：Gross Tonnage 船隻內部總體積空間。
-        * **`Average_cargo_carrying_capacity_dwt_per_vessel_Value`** ➡️ **【平均船舶載重噸位】**：Deadweight Tonnage 實際能載重。
-        * **`Average_container_carrying_capacity_TEU_per_container_ship_Value`** ➡️ **【貨櫃船平均運載量 (TEU)】**：平均能載多少個20呎標準箱。
-        * **`Maximum_size_GT_of_vessels_Value`** ➡️ **【停靠最大船舶總噸位】**：接待過體積最大的超級巨輪規模。
-        * **`Maximum_cargo_carrying_capacity_dwt_of_vessels_Value`** ➡️ **【停靠最大船舶載重噸位】**：接待過載貨最重的超級巨輪重量。
-        * **`Maximum_container_carrying_capacity_TEU_of_container_ships_Value`** ➡️ **【停靠最大貨櫃船運載量 (TEU)】**：接待過載箱數最多的超級貨櫃船。
-        """)
-
-with tab2:
-    if not filtered_df.empty: st.dataframe(filtered_df, use_container_width=True, height=260)
+    if not filtered_df
